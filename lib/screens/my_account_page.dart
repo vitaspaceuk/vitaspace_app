@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:provider/provider.dart';
+import '../providers/spaces_provider.dart';
 import 'home_page.dart';
 import 'login_page.dart';
 import 'reset_password_page.dart';
@@ -58,6 +60,27 @@ class MyAccountPage extends StatelessWidget {
                   ],
                 ),
               ),
+              const SizedBox(height: 20),
+
+              // User Icon and Email
+              Column(
+                children: [
+                  const Icon(
+                    Icons.person,
+                    size: 100,
+                    color: Colors.white,
+                  ),
+                  const SizedBox(height: 10),
+                  Text(
+                    user?.email ?? 'No email available',
+                    style: const TextStyle(
+                      fontSize: 18,
+                      color: Colors.white,
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                ],
+              ),
               const SizedBox(height: 30),
 
               // Account Management Options
@@ -84,11 +107,21 @@ class MyAccountPage extends StatelessWidget {
                       icon: Icons.logout,
                       label: "Sign Out",
                       onTap: () async {
+                        final spacesProvider =
+                            Provider.of<SpacesProvider>(context, listen: false);
+
+                        // Clear spaces data
+                        spacesProvider.clearSpaces();
+
+                        // Sign out user
                         await FirebaseAuth.instance.signOut();
+
+                        // Navigate to LoginPage
                         Navigator.pushReplacement(
                           context,
                           MaterialPageRoute(
-                              builder: (context) => const LoginPage()),
+                            builder: (context) => const LoginPage(),
+                          ),
                         );
                       },
                     ),

@@ -1,8 +1,39 @@
 import 'package:flutter/material.dart';
 import 'my_account_page.dart';
+import 'spaces_page.dart';
 
-class HomePage extends StatelessWidget {
+class HomePage extends StatefulWidget {
   const HomePage({Key? key}) : super(key: key);
+
+  @override
+  _HomePageState createState() => _HomePageState();
+}
+
+class _HomePageState extends State<HomePage> {
+  int _selectedIndex = 0;
+
+  // Pages for each tab
+  static final List<Widget> _pages = <Widget>[
+    Center(
+      child: Text(
+        'Home Page',
+        style: TextStyle(fontSize: 24, color: Colors.white),
+      ),
+    ),
+    SpacesPage(), // Navigate to the SpacesPage
+    Center(
+      child: Text(
+        'Notifications Page',
+        style: TextStyle(fontSize: 24, color: Colors.white),
+      ),
+    ),
+  ];
+
+  void _onItemTapped(int index) {
+    setState(() {
+      _selectedIndex = index;
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -21,7 +52,7 @@ class HomePage extends StatelessWidget {
         child: SafeArea(
           child: Column(
             children: [
-              // App bar like custom header with gradient background removed
+              // Custom Header
               Container(
                 padding:
                     const EdgeInsets.symmetric(vertical: 16, horizontal: 20),
@@ -57,50 +88,66 @@ class HomePage extends StatelessWidget {
               ),
               const SizedBox(height: 50),
 
-              // Welcome message
+              // Main Content Area
               Expanded(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    const Text(
-                      'Welcome to VitaSpace',
-                      textAlign: TextAlign.center,
-                      style: TextStyle(
-                        fontSize: 26,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.white,
-                      ),
-                    ),
-                    const SizedBox(height: 16),
-
-                    // Get Started Button
-                    ElevatedButton(
-                      onPressed: () {
-                        // Placeholder action, can be updated
-                      },
-                      style: ElevatedButton.styleFrom(
-                        padding: const EdgeInsets.symmetric(
-                          vertical: 14,
-                          horizontal: 36,
-                        ),
-                        backgroundColor: const Color(0xFF2575FC),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(30),
-                        ),
-                      ),
-                      child: const Text(
-                        'Add Device',
-                        style: TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.w600,
-                          color: Colors.white,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
+                child: _pages[_selectedIndex],
               ),
             ],
+          ),
+        ),
+      ),
+
+      // Bottom Navigation Bar with Theme to remove splash effect
+      bottomNavigationBar: Theme(
+        data: ThemeData(
+          splashColor: Colors.transparent, // Remove splash color
+          highlightColor: Colors.transparent, // Remove highlight color
+        ),
+        child: Container(
+          decoration: const BoxDecoration(
+            gradient: LinearGradient(
+              colors: [
+                Color(0xFF2575FC), // Blue
+                Color(0xFF6A11CB), // Purple
+              ],
+              begin: Alignment.topCenter,
+              end: Alignment.bottomCenter,
+            ),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black26,
+                offset: Offset(0, -1),
+                blurRadius: 8,
+              ),
+            ],
+          ),
+          child: BottomNavigationBar(
+            backgroundColor: Colors.transparent,
+            elevation: 0,
+            items: const <BottomNavigationBarItem>[
+              BottomNavigationBarItem(
+                icon: Icon(Icons.home_outlined),
+                activeIcon: Icon(Icons.home),
+                label: 'Home',
+              ),
+              BottomNavigationBarItem(
+                icon: Icon(Icons.space_dashboard_outlined),
+                activeIcon: Icon(Icons.space_dashboard),
+                label: 'Spaces',
+              ),
+              BottomNavigationBarItem(
+                icon: Icon(Icons.notifications_outlined),
+                activeIcon: Icon(Icons.notifications),
+                label: 'Notifications',
+              ),
+            ],
+            currentIndex: _selectedIndex,
+            selectedItemColor: Colors.white,
+            unselectedItemColor: Colors.white70,
+            selectedFontSize: 14,
+            unselectedFontSize: 12,
+            type: BottomNavigationBarType.fixed,
+            onTap: _onItemTapped,
           ),
         ),
       ),
