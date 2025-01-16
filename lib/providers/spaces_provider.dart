@@ -4,11 +4,10 @@ import 'package:firebase_auth/firebase_auth.dart';
 
 class SpacesProvider with ChangeNotifier {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
-  List<String> _spaces = [];
+  List<Map<String, dynamic>> _spaces = [];
 
-  List<String> get spaces => _spaces;
+  List<Map<String, dynamic>> get spaces => _spaces;
 
-  // Fetch spaces for the authenticated user
   Future<void> fetchSpaces() async {
     final userId = FirebaseAuth.instance.currentUser?.uid;
     if (userId == null) {
@@ -16,10 +15,6 @@ class SpacesProvider with ChangeNotifier {
       return;
     }
 
-    // Force token refresh
-    await FirebaseAuth.instance.currentUser?.getIdToken(true);
-
-    print('Fetching spaces for user: $userId');
     try {
       final snapshot = await _firestore
           .collection('users')
@@ -27,9 +22,12 @@ class SpacesProvider with ChangeNotifier {
           .collection('spaces')
           .get();
 
-      print('Query successful. Documents: ${snapshot.docs.length}');
-      _spaces = snapshot.docs.map((doc) => doc['name'] as String).toList();
-      print('Fetched spaces: $_spaces');
+      _spaces = snapshot.docs
+          .map((doc) => {
+                'id': doc.id,
+                'name': doc['name'],
+              })
+          .toList();
       notifyListeners();
     } catch (e) {
       print('Error fetching spaces: $e');
@@ -37,30 +35,17 @@ class SpacesProvider with ChangeNotifier {
     }
   }
 
-  // Add a new space for the authenticated user
   Future<void> addSpace(String name) async {
     final userId = FirebaseAuth.instance.currentUser?.uid;
-    if (userId == null) {
-      print('Error: User not authenticated.');
-      return;
-    }
-
-    if (name.isEmpty) {
-      print('Error: Space name cannot be empty.');
-      return;
-    }
-
-    final document = {'name': name};
-    print('Attempting to add space: $document');
+    if (userId == null || name.isEmpty) return;
 
     try {
-      await _firestore
+      final docRef = await _firestore
           .collection('users')
           .doc(userId)
           .collection('spaces')
-          .add(document);
-      print('Space added successfully.');
-      _spaces.add(name);
+          .add({'name': name});
+      _spaces.add({'id': docRef.id, 'name': name});
       notifyListeners();
     } catch (e) {
       print('Error adding space: $e');
@@ -68,10 +53,8 @@ class SpacesProvider with ChangeNotifier {
     }
   }
 
-  // Clear spaces (e.g., on sign-out)
   void clearSpaces() {
     _spaces = [];
     notifyListeners();
-    print('Spaces cleared');
   }
 }

@@ -1,13 +1,21 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:provider/provider.dart';
-import '../providers/spaces_provider.dart';
-import 'devices_page.dart';
+import '../providers/device_provider.dart';
 
-class SpacesPage extends StatelessWidget {
+class DevicesPage extends StatelessWidget {
+  final String spaceId;
+
+  const DevicesPage({Key? key, required this.spaceId}) : super(key: key);
+
   @override
   Widget build(BuildContext context) {
-    final spacesProvider = Provider.of<SpacesProvider>(context, listen: true);
+    final deviceProvider = Provider.of<DeviceProvider>(context, listen: true);
+    final userId = FirebaseAuth.instance.currentUser?.uid;
+
+    if (userId != null) {
+      deviceProvider.fetchDevices(userId, spaceId);
+    }
 
     return Scaffold(
       body: Container(
@@ -21,21 +29,29 @@ class SpacesPage extends StatelessWidget {
         child: SafeArea(
           child: Column(
             children: [
-              // Header
+              // Header with Back Button
               Container(
                 padding:
                     const EdgeInsets.symmetric(vertical: 20, horizontal: 20),
                 child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
+                    IconButton(
+                      icon: const Icon(Icons.arrow_back,
+                          color: Colors.white, size: 28),
+                      onPressed: () {
+                        Navigator.pop(context); // Navigate back to SpacesPage
+                      },
+                    ),
+                    const SizedBox(width: 10),
                     const Text(
-                      'Spaces',
+                      'Devices',
                       style: TextStyle(
                         fontSize: 28,
                         fontWeight: FontWeight.bold,
                         color: Colors.white,
                       ),
                     ),
+                    const Spacer(),
                     IconButton(
                       icon: const Icon(
                         Icons.add,
@@ -43,22 +59,22 @@ class SpacesPage extends StatelessWidget {
                         size: 28,
                       ),
                       onPressed: () {
-                        _showAddSpaceDialog(context, spacesProvider);
+                        _showAddDeviceDialog(context, deviceProvider, userId);
                       },
                     ),
                   ],
                 ),
               ),
 
-              // Spaces List
+              // Devices List
               Expanded(
                 child: ListView.builder(
-                  itemCount: spacesProvider.spaces.length,
+                  itemCount: deviceProvider.devices.length,
                   itemBuilder: (context, index) {
-                    final space = spacesProvider.spaces[index];
+                    final device = deviceProvider.devices[index];
                     return ListTile(
                       title: Text(
-                        space['name'],
+                        device['name'],
                         style: const TextStyle(color: Colors.white),
                       ),
                       tileColor: Colors.black26,
@@ -69,15 +85,6 @@ class SpacesPage extends StatelessWidget {
                         vertical: 10,
                         horizontal: 16,
                       ),
-                      onTap: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) =>
-                                DevicesPage(spaceId: space['id']),
-                          ),
-                        );
-                      },
                     );
                   },
                 ),
@@ -89,16 +96,17 @@ class SpacesPage extends StatelessWidget {
     );
   }
 
-  void _showAddSpaceDialog(
-      BuildContext context, SpacesProvider spacesProvider) {
+  void _showAddDeviceDialog(
+      BuildContext context, DeviceProvider deviceProvider, String? userId) {
+    if (userId == null) return;
     final TextEditingController controller = TextEditingController();
     showDialog(
       context: context,
       builder: (_) => AlertDialog(
-        title: const Text('Add Space'),
+        title: const Text('Add Device'),
         content: TextField(
           controller: controller,
-          decoration: const InputDecoration(hintText: 'Enter space name'),
+          decoration: const InputDecoration(hintText: 'Enter device name'),
         ),
         actions: [
           TextButton(
@@ -107,7 +115,7 @@ class SpacesPage extends StatelessWidget {
           ),
           ElevatedButton(
             onPressed: () async {
-              await spacesProvider.addSpace(controller.text);
+              await deviceProvider.addDevice(userId, spaceId, controller.text);
               Navigator.pop(context);
             },
             child: const Text('Add'),
