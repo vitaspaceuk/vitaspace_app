@@ -33,108 +33,96 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Container(
-        decoration: const BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-            colors: [
-              Color(0xFF6A11CB), // Purple
-              Color(0xFF2575FC), // Blue
-            ],
-          ),
-        ),
-        child: Center(
-          child: SingleChildScrollView(
-            padding: const EdgeInsets.symmetric(horizontal: 24),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                // Title
-                const Text(
-                  'Reset Password',
+      backgroundColor: Colors.white,
+      body: Center(
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.symmetric(horizontal: 24),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              // Title
+              const Text(
+                'Reset Password',
+                style: TextStyle(
+                  fontSize: 28,
+                  fontWeight: FontWeight.bold,
+                  color: Color(0xFF4EAACC), // Turquoise
+                ),
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: 16),
+
+              // Subtitle
+              const Text(
+                'Enter your email address below, and we’ll send you an email to reset your password.',
+                style: TextStyle(
+                  fontSize: 16,
+                  color: Colors.black54,
+                ),
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: 30),
+
+              // Email Input
+              TextField(
+                controller: _emailController,
+                decoration: InputDecoration(
+                  labelText: 'Email',
+                  labelStyle: const TextStyle(color: Colors.black54),
+                  prefixIcon: const Icon(
+                    Icons.email_outlined,
+                    color: Color(0xFF4EAACC),
+                  ),
+                  filled: true,
+                  fillColor: Colors.grey[200],
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                    borderSide: BorderSide.none,
+                  ),
+                ),
+              ),
+              const SizedBox(height: 20),
+
+              // Send Reset Email Button
+              ElevatedButton(
+                onPressed: _resetPassword,
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: const Color(0xFF4EAACC), // Turquoise
+                  foregroundColor: Colors.white,
+                  padding: const EdgeInsets.symmetric(vertical: 14),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                ),
+                child: const Text(
+                  'Send Reset Email',
+                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                ),
+              ),
+
+              const SizedBox(height: 16),
+
+              // Back to Login Button
+              TextButton(
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => const LoginPage(),
+                    ),
+                  ); // Navigate back to login
+                },
+                child: const Text(
+                  'Back to Login',
                   style: TextStyle(
-                    fontSize: 28,
+                    color: Color(0xFF4EAACC), // Turquoise
                     fontWeight: FontWeight.bold,
-                    color: Colors.white,
-                  ),
-                  textAlign: TextAlign.center,
-                ),
-                const SizedBox(height: 16),
-
-                // Subtitle
-                const Text(
-                  'Enter your email address below, and we’ll send you an email to reset your password.',
-                  style: TextStyle(
-                    fontSize: 16,
-                    color: Colors.white70,
-                  ),
-                  textAlign: TextAlign.center,
-                ),
-                const SizedBox(height: 30),
-
-                // Email Input
-                TextField(
-                  controller: _emailController,
-                  style: const TextStyle(color: Colors.white),
-                  decoration: InputDecoration(
-                    labelText: 'Email',
-                    labelStyle: const TextStyle(color: Colors.white70),
-                    filled: true,
-                    fillColor: Colors.white.withOpacity(0.2),
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12),
-                      borderSide: BorderSide.none,
-                    ),
-                    prefixIcon: const Icon(
-                      Icons.email,
-                      color: Colors.white70,
-                    ),
+                    fontSize: 14,
                   ),
                 ),
-                const SizedBox(height: 20),
-
-                // Send Reset Email Button
-                ElevatedButton(
-                  onPressed: _resetPassword,
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.white,
-                    foregroundColor: const Color(0xFF2575FC),
-                    padding: const EdgeInsets.symmetric(vertical: 14),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                  ),
-                  child: const Text(
-                    'Send Reset Email',
-                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-                  ),
-                ),
-
-                const SizedBox(height: 16),
-
-                // Back to Login Button
-                TextButton(
-                  onPressed: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => const LoginPage(),
-                      ),
-                    ); // Navigate back to login
-                  },
-                  child: const Text(
-                    'Back to Login',
-                    style: TextStyle(
-                      color: Colors.white70,
-                      fontWeight: FontWeight.bold,
-                      fontSize: 14,
-                    ),
-                  ),
-                ),
-              ],
-            ),
+              ),
+            ],
           ),
         ),
       ),

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'my_account_page.dart';
 import 'spaces_page.dart';
+import 'notification_page.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({Key? key}) : super(key: key);
@@ -17,16 +18,11 @@ class _HomePageState extends State<HomePage> {
     Center(
       child: Text(
         'Home Page',
-        style: TextStyle(fontSize: 24, color: Colors.white),
+        style: TextStyle(fontSize: 24, color: Colors.black87),
       ),
     ),
-    SpacesPage(), // Navigate to the SpacesPage
-    Center(
-      child: Text(
-        'Notifications Page',
-        style: TextStyle(fontSize: 24, color: Colors.white),
-      ),
-    ),
+    SpacesPage(), // SpacesPage
+    NotificationPage(), // NotificationPage
   ];
 
   void _onItemTapped(int index) {
@@ -40,53 +36,47 @@ class _HomePageState extends State<HomePage> {
     return Scaffold(
       body: Container(
         decoration: const BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-            colors: [
-              Color(0xFF6A11CB), // Purple
-              Color(0xFF2575FC), // Blue
-            ],
-          ),
+          color: Colors.white, // Solid white background
         ),
         child: SafeArea(
           child: Column(
             children: [
-              // Custom Header
-              Container(
-                padding:
-                    const EdgeInsets.symmetric(vertical: 16, horizontal: 20),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    const Text(
-                      'VitaSpace',
-                      style: TextStyle(
-                        fontSize: 28,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.white,
+              // Show Header only on the Home Page
+              if (_selectedIndex == 0)
+                Container(
+                  padding:
+                      const EdgeInsets.symmetric(vertical: 16, horizontal: 20),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      const Text(
+                        'VitaSpace',
+                        style: TextStyle(
+                          fontSize: 28,
+                          fontWeight: FontWeight.bold,
+                          color: Color(0xFF4EAACC), // Turquoise
+                        ),
                       ),
-                    ),
-                    IconButton(
-                      icon: const Icon(
-                        Icons.account_circle,
-                        size: 40,
-                        color: Colors.white,
+                      IconButton(
+                        icon: const Icon(
+                          Icons.account_circle,
+                          size: 40,
+                          color: Color(0xFF4EAACC), // Turquoise
+                        ),
+                        onPressed: () {
+                          // Navigate to the "My Account" page
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => const MyAccountPage(),
+                            ),
+                          );
+                        },
                       ),
-                      onPressed: () {
-                        // Navigate to the "My Account" page
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => const MyAccountPage(),
-                          ),
-                        );
-                      },
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
-              ),
-              const SizedBox(height: 50),
+              const SizedBox(height: 5),
 
               // Main Content Area
               Expanded(
@@ -105,14 +95,7 @@ class _HomePageState extends State<HomePage> {
         ),
         child: Container(
           decoration: const BoxDecoration(
-            gradient: LinearGradient(
-              colors: [
-                Color(0xFF2575FC), // Blue
-                Color(0xFF6A11CB), // Purple
-              ],
-              begin: Alignment.topCenter,
-              end: Alignment.bottomCenter,
-            ),
+            color: Colors.white, // Solid white background
             boxShadow: [
               BoxShadow(
                 color: Colors.black26,
@@ -142,8 +125,8 @@ class _HomePageState extends State<HomePage> {
               ),
             ],
             currentIndex: _selectedIndex,
-            selectedItemColor: Colors.white,
-            unselectedItemColor: Colors.white70,
+            selectedItemColor: Color(0xFF4EAACC), // Turquoise
+            unselectedItemColor: Colors.black54, // Dark gray for unselected
             selectedFontSize: 14,
             unselectedFontSize: 12,
             type: BottomNavigationBarType.fixed,

@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 
 class DeviceProvider with ChangeNotifier {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
@@ -41,5 +40,28 @@ class DeviceProvider with ChangeNotifier {
     } catch (e) {
       print('Error adding device: $e');
     }
+  }
+
+  Future<void> removeDevice(
+      String userId, String spaceId, String deviceId) async {
+    try {
+      await _firestore
+          .collection('users')
+          .doc(userId)
+          .collection('spaces')
+          .doc(spaceId)
+          .collection('devices')
+          .doc(deviceId)
+          .delete();
+      _devices.removeWhere((device) => device['id'] == deviceId);
+      notifyListeners();
+    } catch (e) {
+      print('Error removing device: $e');
+    }
+  }
+
+  void clearDevices() {
+    _devices = [];
+    notifyListeners();
   }
 }

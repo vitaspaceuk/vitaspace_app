@@ -14,122 +14,110 @@ class MyAccountPage extends StatelessWidget {
     final User? user = FirebaseAuth.instance.currentUser;
 
     return Scaffold(
-      body: Container(
-        decoration: const BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-            colors: [
-              Color(0xFF6A11CB), // Purple
-              Color(0xFF2575FC), // Blue
-            ],
-          ),
-        ),
-        child: SafeArea(
-          child: Column(
-            children: [
-              // Back Button and Title
-              Container(
-                padding:
-                    const EdgeInsets.symmetric(vertical: 20, horizontal: 20),
-                child: Row(
-                  children: [
-                    IconButton(
-                      icon: const Icon(
-                        Icons.arrow_back,
-                        color: Colors.white,
-                        size: 28,
-                      ),
-                      onPressed: () {
-                        Navigator.pushReplacement(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => const HomePage(),
-                          ),
-                        );
-                      },
-                    ),
-                    const Text(
-                      'My Account',
-                      style: TextStyle(
-                        fontSize: 22,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.white,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              const SizedBox(height: 20),
-
-              // User Icon and Email
-              Column(
+      backgroundColor: Colors.white,
+      body: SafeArea(
+        child: Column(
+          children: [
+            // Back Button and Title
+            Container(
+              padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 20),
+              child: Row(
                 children: [
-                  const Icon(
-                    Icons.person,
-                    size: 100,
-                    color: Colors.white,
-                  ),
-                  const SizedBox(height: 10),
-                  Text(
-                    user?.email ?? 'No email available',
-                    style: const TextStyle(
-                      fontSize: 18,
-                      color: Colors.white,
+                  IconButton(
+                    icon: const Icon(
+                      Icons.arrow_back,
+                      color: Color(0xFF4EAACC), // Turquoise
+                      size: 28,
                     ),
-                    textAlign: TextAlign.center,
+                    onPressed: () {
+                      Navigator.pushReplacement(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => const HomePage(),
+                        ),
+                      );
+                    },
+                  ),
+                  const Text(
+                    'My Account',
+                    style: TextStyle(
+                      fontSize: 22,
+                      fontWeight: FontWeight.bold,
+                      color: Color(0xFF4EAACC), // Turquoise
+                    ),
                   ),
                 ],
               ),
-              const SizedBox(height: 30),
+            ),
+            const SizedBox(height: 20),
 
-              // Account Management Options
-              Expanded(
-                child: ListView(
-                  padding: const EdgeInsets.symmetric(horizontal: 20),
-                  children: [
-                    _buildAccountOption(
-                      context,
-                      icon: Icons.lock,
-                      label: "Change Password",
-                      onTap: () {
-                        // Navigate to change password page
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => const ResetPasswordPage(),
-                          ),
-                        );
-                      },
-                    ),
-                    _buildAccountOption(
-                      context,
-                      icon: Icons.logout,
-                      label: "Sign Out",
-                      onTap: () async {
-                        final spacesProvider =
-                            Provider.of<SpacesProvider>(context, listen: false);
-
-                        // Clear spaces data
-                        spacesProvider.clearSpaces();
-
-                        // Sign out user
-                        await FirebaseAuth.instance.signOut();
-
-                        // Navigate to LoginPage
-                        Navigator.pushReplacement(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => const LoginPage(),
-                          ),
-                        );
-                      },
-                    ),
-                  ],
+            // User Icon and Email
+            Column(
+              children: [
+                const Icon(
+                  Icons.person,
+                  size: 100,
+                  color: Color(0xFF4EAACC), // Turquoise
                 ),
+                const SizedBox(height: 10),
+                Text(
+                  user?.email ?? 'No email available',
+                  style: const TextStyle(
+                    fontSize: 18,
+                    color: Colors.black87,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+              ],
+            ),
+            const SizedBox(height: 30),
+
+            // Account Management Options
+            Expanded(
+              child: ListView(
+                padding: const EdgeInsets.symmetric(horizontal: 20),
+                children: [
+                  _buildAccountOption(
+                    context,
+                    icon: Icons.lock,
+                    label: "Change Password",
+                    onTap: () {
+                      // Navigate to change password page
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => const ResetPasswordPage(),
+                        ),
+                      );
+                    },
+                  ),
+                  _buildAccountOption(
+                    context,
+                    icon: Icons.logout,
+                    label: "Sign Out",
+                    onTap: () async {
+                      final spacesProvider =
+                          Provider.of<SpacesProvider>(context, listen: false);
+
+                      // Clear spaces data
+                      spacesProvider.clearSpaces();
+
+                      // Sign out user
+                      await FirebaseAuth.instance.signOut();
+
+                      // Navigate to LoginPage
+                      Navigator.pushReplacement(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => const LoginPage(),
+                        ),
+                      );
+                    },
+                  ),
+                ],
               ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );
@@ -148,7 +136,7 @@ class MyAccountPage extends StatelessWidget {
         margin: const EdgeInsets.only(bottom: 16),
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: Colors.grey[200], // Light gray background
           borderRadius: BorderRadius.circular(10),
           boxShadow: [
             BoxShadow(
@@ -162,7 +150,7 @@ class MyAccountPage extends StatelessWidget {
           children: [
             Icon(
               icon,
-              color: Colors.blueAccent,
+              color: const Color(0xFF4EAACC), // Turquoise
               size: 28,
             ),
             const SizedBox(width: 16),
@@ -171,6 +159,7 @@ class MyAccountPage extends StatelessWidget {
               style: const TextStyle(
                 fontSize: 16,
                 fontWeight: FontWeight.w600,
+                color: Colors.black87,
               ),
             ),
           ],

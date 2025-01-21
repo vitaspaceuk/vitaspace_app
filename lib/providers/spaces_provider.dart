@@ -53,6 +53,50 @@ class SpacesProvider with ChangeNotifier {
     }
   }
 
+  Future<void> renameSpace(String spaceId, String newName) async {
+    final userId = FirebaseAuth.instance.currentUser?.uid;
+    if (userId == null || newName.isEmpty) return;
+
+    try {
+      await _firestore
+          .collection('users')
+          .doc(userId)
+          .collection('spaces')
+          .doc(spaceId)
+          .update({'name': newName});
+
+      final space = _spaces.firstWhere((space) => space['id'] == spaceId);
+      space['name'] = newName;
+      notifyListeners();
+    } catch (e) {
+      print('Error renaming space: $e');
+      rethrow;
+    }
+  }
+
+  Future<void> deleteSpace(String spaceId) async {
+    final userId = FirebaseAuth.instance.currentUser?.uid;
+    if (userId == null) {
+      print('Error: User not authenticated.');
+      return;
+    }
+
+    try {
+      await _firestore
+          .collection('users')
+          .doc(userId)
+          .collection('spaces')
+          .doc(spaceId)
+          .delete();
+
+      _spaces.removeWhere((space) => space['id'] == spaceId);
+      notifyListeners();
+    } catch (e) {
+      print('Error deleting space: $e');
+      rethrow;
+    }
+  }
+
   void clearSpaces() {
     _spaces = [];
     notifyListeners();

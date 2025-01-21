@@ -9,24 +9,23 @@ class SpaceDetailPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(spaceName),
-        backgroundColor: const Color(0xFF6A11CB),
+        title: Text(
+          spaceName,
+          style: const TextStyle(color: Colors.white),
+        ),
+        backgroundColor: const Color(0xFF40E0D0), // Turquoise
+        iconTheme: const IconThemeData(color: Colors.white), // White back icon
       ),
       body: Container(
-        decoration: const BoxDecoration(
-          gradient: LinearGradient(
-            colors: [
-              Color(0xFF6A11CB),
-              Color(0xFF2575FC),
-            ],
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-          ),
-        ),
+        color: Colors.white, // Set a solid white background
         child: Center(
           child: Text(
             'Welcome to $spaceName!',
-            style: const TextStyle(fontSize: 24, color: Colors.white),
+            style: const TextStyle(
+              fontSize: 24,
+              color: Color(0xFF40E0D0), // Turquoise
+              fontWeight: FontWeight.bold,
+            ),
           ),
         ),
       ),

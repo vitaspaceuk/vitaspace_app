@@ -11,33 +11,22 @@ class SplashScreen extends StatelessWidget {
     });
 
     return Scaffold(
-      body: Container(
-        decoration: const BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-            colors: [
-              Color(0xFF6A11CB), // Purple
-              Color(0xFF2575FC), // Blue
-            ],
-          ),
-        ),
-        child: Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              // App Name
-              const Text(
-                'VitaSpace',
-                style: TextStyle(
-                  fontSize: 40,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.white,
-                ),
+      backgroundColor: Colors.white,
+      body: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            // App Name
+            const Text(
+              'VitaSpace',
+              style: TextStyle(
+                fontSize: 40,
+                fontWeight: FontWeight.bold,
+                color: Color(0xFF4EAACC), // Turquoise
               ),
-              const SizedBox(height: 10),
-            ],
-          ),
+            ),
+            const SizedBox(height: 10),
+          ],
         ),
       ),
     );
