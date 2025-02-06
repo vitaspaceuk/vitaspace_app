@@ -26,8 +26,24 @@
 	<string>$(FLUTTER_BUILD_NUMBER)</string>
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
+	<key>NSBluetoothAlwaysUsageDescription</key>
+	<string>Required for detecting nearby Wi-Fi networks.</string>
+	<key>NSBluetoothPeripheralUsageDescription</key>
+	<string>This app needs Bluetooth access to communicate with IoT devices.</string>
+	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
+	<string>This app requires location access to function properly.</string>
+	<key>NSLocationAlwaysUsageDescription</key>
+	<string>Required for background Wi-Fi scanning.</string>
+	<key>NSLocationUsageDescription</key>
+	<string>Wi-Fi scanning requires location access.</string>
+	<key>NSLocationWhenInUseUsageDescription</key>
+	<string>This app requires location permission to scan for Wi-Fi networks.</string>
 	<key>UIApplicationSupportsIndirectInputEvents</key>
 	<true/>
+	<key>UIBackgroundModes</key>
+	<array>
+		<string>location</string>
+	</array>
 	<key>UILaunchStoryboardName</key>
 	<string>LaunchScreen</string>
 	<key>UIMainStoryboardFile</key>
@@ -45,13 +61,19 @@
 		<string>UIInterfaceOrientationLandscapeLeft</string>
 		<string>UIInterfaceOrientationLandscapeRight</string>
 	</array>
-	<key>NSBluetoothAlwaysUsageDescription</key>
-	<string>This app uses Bluetooth to connect to devices.</string>
-	<key>NSBluetoothPeripheralUsageDescription</key>
-	<string>This app needs Bluetooth access to communicate with IoT devices.</string>
 	<key>NSLocationWhenInUseUsageDescription</key>
-	<string>This app requires location access to scan for Bluetooth devices.</string>
-	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
-	<string>This app requires location access to function properly.</string>
+<string>We need access to your location to scan Wi-Fi networks.</string>
+<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
+<string>We need access to your location to scan Wi-Fi networks.</string>
+<key>NSLocationAlwaysUsageDescription</key>
+<string>We need access to your location to scan Wi-Fi networks.</string>
+<key>NSLocationWhenInUseUsageDescription</key>
+<string>App needs location access for Wi-Fi scanning.</string>
+
+<key>NSLocationAlwaysUsageDescription</key>
+<string>App needs location access for Wi-Fi scanning.</string>
+
+<key>NSLocationUsageDescription</key>
+<string>App needs location access for Wi-Fi scanning.</string>
 </dict>
 </plist>

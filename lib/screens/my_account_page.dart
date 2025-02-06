@@ -5,6 +5,7 @@ import '../providers/spaces_provider.dart';
 import 'home_page.dart';
 import 'login_page.dart';
 import 'reset_password_page.dart';
+import 'help_page.dart';
 
 class MyAccountPage extends StatelessWidget {
   const MyAccountPage({Key? key}) : super(key: key);
@@ -30,18 +31,14 @@ class MyAccountPage extends StatelessWidget {
                       size: 28,
                     ),
                     onPressed: () {
-                      Navigator.pushReplacement(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => const HomePage(),
-                        ),
-                      );
+                      Navigator.pop(
+                          context); // Takes the user back to the last page
                     },
                   ),
                   const Text(
                     'My Account',
                     style: TextStyle(
-                      fontSize: 22,
+                      fontSize: 28,
                       fontWeight: FontWeight.bold,
                       color: Color(0xFF4EAACC), // Turquoise
                     ),
@@ -87,6 +84,20 @@ class MyAccountPage extends StatelessWidget {
                         context,
                         MaterialPageRoute(
                           builder: (context) => const ResetPasswordPage(),
+                        ),
+                      );
+                    },
+                  ),
+                  _buildAccountOption(
+                    context,
+                    icon: Icons.help_outline,
+                    label: "Help",
+                    onTap: () {
+                      // Navigate to HelpPage
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => const HelpPage(),
                         ),
                       );
                     },

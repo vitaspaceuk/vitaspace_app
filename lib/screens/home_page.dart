@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:fl_chart/fl_chart.dart';
 import 'my_account_page.dart';
 import 'spaces_page.dart';
 import 'notification_page.dart';
@@ -13,16 +14,86 @@ class HomePage extends StatefulWidget {
 class _HomePageState extends State<HomePage> {
   int _selectedIndex = 0;
 
-  // Pages for each tab
+  // Sample data for the charts
+  List<FlSpot> temperatureData = [
+    FlSpot(0, 22),
+    FlSpot(1, 23),
+    FlSpot(2, 21),
+    FlSpot(3, 24),
+    FlSpot(4, 22)
+  ];
+
+  List<FlSpot> humidityData = [
+    FlSpot(0, 45),
+    FlSpot(1, 50),
+    FlSpot(2, 55),
+    FlSpot(3, 52),
+    FlSpot(4, 48)
+  ];
+
+  List<FlSpot> dustData = [
+    FlSpot(0, 12),
+    FlSpot(1, 14),
+    FlSpot(2, 10),
+    FlSpot(3, 15),
+    FlSpot(4, 13)
+  ];
+
+  Widget _buildGraph(String title, List<FlSpot> data, Color color) {
+    return Card(
+      margin: const EdgeInsets.symmetric(vertical: 10, horizontal: 16),
+      elevation: 4,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      child: Padding(
+        padding: const EdgeInsets.all(12.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(title,
+                style:
+                    const TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+            SizedBox(
+                height: 200,
+                child: LineChart(
+                  LineChartData(
+                    gridData: FlGridData(show: false),
+                    titlesData: FlTitlesData(show: false),
+                    borderData: FlBorderData(show: false),
+                    lineBarsData: [
+                      LineChartBarData(
+                        spots: data,
+                        isCurved: true,
+                        color: color,
+                        dotData: FlDotData(show: false),
+                        belowBarData: BarAreaData(
+                            show: true, color: color.withOpacity(0.3)),
+                      )
+                    ],
+                  ),
+                )),
+          ],
+        ),
+      ),
+    );
+  }
+
   static final List<Widget> _pages = <Widget>[
-    Center(
-      child: Text(
-        'Home Page',
-        style: TextStyle(fontSize: 24, color: Colors.black87),
+    SingleChildScrollView(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          SizedBox(height: 10), // Add spacing if needed
+          _HomePageState()._buildGraph('Room Temperature (°C)',
+              _HomePageState().temperatureData, Colors.red),
+          _HomePageState()._buildGraph(
+              'Room Humidity (%)', _HomePageState().humidityData, Colors.blue),
+          _HomePageState()._buildGraph('Dust Concentration (µg/m³)',
+              _HomePageState().dustData, Colors.green),
+        ],
       ),
     ),
-    SpacesPage(), // SpacesPage
-    NotificationPage(), // NotificationPage
+    SpacesPage(),
+    NotificationPage(),
   ];
 
   void _onItemTapped(int index) {
@@ -35,41 +106,32 @@ class _HomePageState extends State<HomePage> {
   Widget build(BuildContext context) {
     return Scaffold(
       body: Container(
-        decoration: const BoxDecoration(
-          color: Colors.white, // Solid white background
-        ),
+        decoration: const BoxDecoration(color: Colors.white),
         child: SafeArea(
           child: Column(
             children: [
-              // Show Header only on the Home Page
               if (_selectedIndex == 0)
                 Container(
                   padding:
-                      const EdgeInsets.symmetric(vertical: 16, horizontal: 20),
+                      const EdgeInsets.symmetric(vertical: 21, horizontal: 20),
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       const Text(
                         'VitaSpace',
                         style: TextStyle(
-                          fontSize: 28,
-                          fontWeight: FontWeight.bold,
-                          color: Color(0xFF4EAACC), // Turquoise
-                        ),
+                            fontSize: 28,
+                            fontWeight: FontWeight.bold,
+                            color: Color(0xFF4EAACC)),
                       ),
                       IconButton(
-                        icon: const Icon(
-                          Icons.account_circle,
-                          size: 40,
-                          color: Color(0xFF4EAACC), // Turquoise
-                        ),
+                        icon: const Icon(Icons.account_circle,
+                            size: 40, color: Color(0xFF4EAACC)),
                         onPressed: () {
-                          // Navigate to the "My Account" page
                           Navigator.push(
                             context,
                             MaterialPageRoute(
-                              builder: (context) => const MyAccountPage(),
-                            ),
+                                builder: (context) => const MyAccountPage()),
                           );
                         },
                       ),
@@ -77,31 +139,21 @@ class _HomePageState extends State<HomePage> {
                   ),
                 ),
               const SizedBox(height: 5),
-
-              // Main Content Area
-              Expanded(
-                child: _pages[_selectedIndex],
-              ),
+              Expanded(child: _pages[_selectedIndex]),
             ],
           ),
         ),
       ),
-
-      // Bottom Navigation Bar with Theme to remove splash effect
       bottomNavigationBar: Theme(
         data: ThemeData(
-          splashColor: Colors.transparent, // Remove splash color
-          highlightColor: Colors.transparent, // Remove highlight color
-        ),
+            splashColor: Colors.transparent,
+            highlightColor: Colors.transparent),
         child: Container(
           decoration: const BoxDecoration(
-            color: Colors.white, // Solid white background
+            color: Colors.white,
             boxShadow: [
               BoxShadow(
-                color: Colors.black26,
-                offset: Offset(0, -1),
-                blurRadius: 8,
-              ),
+                  color: Colors.black26, offset: Offset(0, -1), blurRadius: 8)
             ],
           ),
           child: BottomNavigationBar(
@@ -109,24 +161,21 @@ class _HomePageState extends State<HomePage> {
             elevation: 0,
             items: const <BottomNavigationBarItem>[
               BottomNavigationBarItem(
-                icon: Icon(Icons.home_outlined),
-                activeIcon: Icon(Icons.home),
-                label: 'Home',
-              ),
+                  icon: Icon(Icons.home_outlined),
+                  activeIcon: Icon(Icons.home),
+                  label: 'Home'),
               BottomNavigationBarItem(
-                icon: Icon(Icons.space_dashboard_outlined),
-                activeIcon: Icon(Icons.space_dashboard),
-                label: 'Spaces',
-              ),
+                  icon: Icon(Icons.space_dashboard_outlined),
+                  activeIcon: Icon(Icons.space_dashboard),
+                  label: 'Spaces'),
               BottomNavigationBarItem(
-                icon: Icon(Icons.notifications_outlined),
-                activeIcon: Icon(Icons.notifications),
-                label: 'Notifications',
-              ),
+                  icon: Icon(Icons.notifications_outlined),
+                  activeIcon: Icon(Icons.notifications),
+                  label: 'Notifications'),
             ],
             currentIndex: _selectedIndex,
-            selectedItemColor: Color(0xFF4EAACC), // Turquoise
-            unselectedItemColor: Colors.black54, // Dark gray for unselected
+            selectedItemColor: Color(0xFF4EAACC),
+            unselectedItemColor: Colors.black54,
             selectedFontSize: 14,
             unselectedFontSize: 12,
             type: BottomNavigationBarType.fixed,
