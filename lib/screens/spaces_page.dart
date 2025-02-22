@@ -11,7 +11,8 @@ class SpacesPage extends StatelessWidget {
     final spacesProvider = Provider.of<SpacesProvider>(context, listen: false);
     final user = FirebaseAuth.instance.currentUser;
 
-    if (user != null) {
+    // Fetch spaces if the user is logged in and they haven't been fetched yet
+    if (user != null && spacesProvider.spaces.isEmpty) {
       spacesProvider.fetchSpaces();
     }
 
@@ -57,6 +58,16 @@ class SpacesPage extends StatelessWidget {
             Expanded(
               child: Consumer<SpacesProvider>(
                 builder: (context, provider, child) {
+                  // Show a loading indicator if spaces are still being fetched
+                  if (provider.spaces.isEmpty && provider.isLoading) {
+                    return const Center(
+                      child: CircularProgressIndicator(
+                        valueColor:
+                            AlwaysStoppedAnimation<Color>(Color(0xFF4EAACC)),
+                      ),
+                    );
+                  }
+
                   if (provider.spaces.isEmpty) {
                     return const Center(
                       child: Text(
@@ -65,6 +76,7 @@ class SpacesPage extends StatelessWidget {
                       ),
                     );
                   }
+
                   return ListView.builder(
                     itemCount: provider.spaces.length,
                     itemBuilder: (context, index) {

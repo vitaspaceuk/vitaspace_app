@@ -5,8 +5,10 @@ import 'package:firebase_auth/firebase_auth.dart';
 class SpacesProvider with ChangeNotifier {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   List<Map<String, dynamic>> _spaces = [];
+  bool _isLoading = false;
 
   List<Map<String, dynamic>> get spaces => _spaces;
+  bool get isLoading => _isLoading;
 
   Future<void> fetchSpaces() async {
     final userId = FirebaseAuth.instance.currentUser?.uid;
@@ -14,6 +16,13 @@ class SpacesProvider with ChangeNotifier {
       print('Error: User not authenticated.');
       return;
     }
+
+    _isLoading = true;
+
+    // Defer notifyListeners() to avoid the error during build phase
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      notifyListeners(); // Notify listeners after the build phase
+    });
 
     try {
       final snapshot = await _firestore
@@ -28,9 +37,22 @@ class SpacesProvider with ChangeNotifier {
                 'name': doc['name'],
               })
           .toList();
-      notifyListeners();
+
+      _isLoading = false;
+
+      // Defer notifyListeners() to avoid the error during build phase
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        notifyListeners(); // Notify listeners after the build phase
+      });
     } catch (e) {
       print('Error fetching spaces: $e');
+      _isLoading = false;
+
+      // Defer notifyListeners() to avoid the error during build phase
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        notifyListeners(); // Notify listeners after the build phase
+      });
+
       rethrow;
     }
   }
@@ -46,6 +68,7 @@ class SpacesProvider with ChangeNotifier {
           .collection('spaces')
           .add({'name': name});
       _spaces.add({'id': docRef.id, 'name': name});
+
       notifyListeners();
     } catch (e) {
       print('Error adding space: $e');

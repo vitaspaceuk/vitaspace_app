@@ -1,11 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:provider/provider.dart';
-import 'package:permission_handler/permission_handler.dart';
-import 'package:wifi_scan/wifi_scan.dart';
 import 'package:http/http.dart' as http;
 import '../providers/device_provider.dart';
-import 'dart:async';
 
 class DevicesPage extends StatefulWidget {
   final String spaceId;
@@ -17,63 +14,6 @@ class DevicesPage extends StatefulWidget {
 }
 
 class _DevicesPageState extends State<DevicesPage> {
-  List<String> _foundDevices = [];
-  bool _isSearching = false;
-
-  @override
-  void dispose() {
-    super.dispose();
-  }
-
-  void _showDeviceOptionsDialog(
-      BuildContext context,
-      DeviceProvider deviceProvider,
-      String userId,
-      Map<String, dynamic> device) {
-    TextEditingController renameController =
-        TextEditingController(text: device['name']);
-
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: Text(device['name']),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              TextField(
-                controller: renameController,
-                decoration: const InputDecoration(labelText: 'Rename Device'),
-              ),
-            ],
-          ),
-          actions: [
-            TextButton(
-              onPressed: () {
-                Navigator.pop(context);
-                deviceProvider.renameDevice(userId, widget.spaceId,
-                    device['id'], renameController.text);
-              },
-              child: const Text('Rename', style: TextStyle(color: Colors.blue)),
-            ),
-            TextButton(
-              onPressed: () {
-                Navigator.pop(context);
-                deviceProvider.removeDevice(
-                    userId, widget.spaceId, device['id']);
-              },
-              child: const Text('Delete', style: TextStyle(color: Colors.red)),
-            ),
-            TextButton(
-              onPressed: () => Navigator.pop(context),
-              child: const Text('Cancel'),
-            ),
-          ],
-        );
-      },
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     final deviceProvider = Provider.of<DeviceProvider>(context, listen: true);
@@ -115,16 +55,10 @@ class _DevicesPageState extends State<DevicesPage> {
                     ],
                   ),
                   IconButton(
-                    icon: _isSearching
-                        ? const Icon(Icons.stop, color: Colors.red, size: 28)
-                        : const Icon(Icons.add,
-                            color: Color(0xFF4EAACC), size: 28),
+                    icon: const Icon(Icons.add,
+                        color: Color(0xFF4EAACC), size: 28),
                     onPressed: () {
-                      if (_isSearching) {
-                        setState(() => _isSearching = false);
-                      } else {
-                        _startSearching();
-                      }
+                      _showWiFiConnectionDialog();
                     },
                   ),
                 ],
@@ -159,14 +93,6 @@ class _DevicesPageState extends State<DevicesPage> {
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(10),
                           ),
-                          trailing: IconButton(
-                            icon: const Icon(Icons.more_vert,
-                                color: Colors.grey, size: 28),
-                            onPressed: () {
-                              _showDeviceOptionsDialog(
-                                  context, deviceProvider, userId!, device);
-                            },
-                          ),
                         ),
                       );
                     },
@@ -180,65 +106,62 @@ class _DevicesPageState extends State<DevicesPage> {
     );
   }
 
-  void _startSearching() async {
-    setState(() {
-      _isSearching = true;
-      _foundDevices = [];
-    });
-
-    // Request necessary permissions
-    if (await _requestPermissions()) {
-      final canScan = await WiFiScan.instance.canStartScan();
-      if (canScan != CanStartScan.yes) {
-        print("❌ Wi-Fi scanning is not allowed.");
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-              content: Text(
-                  "Wi-Fi scanning is not allowed. Grant permissions in settings.")),
-        );
-        return;
-      }
-
-      await WiFiScan.instance.startScan();
-      final networks = await WiFiScan.instance.getScannedResults();
-
-      setState(() {
-        _foundDevices = networks
-            .where((net) =>
-                net.ssid.startsWith("VitaSpace_")) // Only ESP32 SoftAPs
-            .map((net) => net.ssid)
-            .toList();
-        _isSearching = false;
-      });
-
-      _showWiFiSelectionDialog();
-    } else {
-      print("❌ Permissions denied.");
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text("Wi-Fi scan requires location permission.")),
-      );
-    }
-  }
-
-  void _showWiFiSelectionDialog() {
+  // Show Wi-Fi credentials dialog with instructions
+  void _showWiFiConnectionDialog() {
     showDialog(
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: const Text('Select a Device'),
+          title: const Text('Connect to Device'),
           content: Column(
             mainAxisSize: MainAxisSize.min,
-            children: _foundDevices.map((device) {
-              return ListTile(
-                title: Text(device),
-                onTap: () {
-                  Navigator.pop(context);
-                  _startSoftAPProvisioning(device);
+            children: [
+              // Instructions Text
+              const Text(
+                'Step 1: Open your phone’s Wi-Fi settings.\n\n'
+                'Step 2: Connect to the Wi-Fi network named:\n'
+                '"VitaSpace_<Device_ID>"\n\n'
+                'Step 3: Reopen the VitaSpace app and enter the SSID and password of your home Wi-Fi network.\n\n'
+                'Step 4: Press "Connect" to send the credentials.',
+                style: TextStyle(fontSize: 14, color: Colors.black54),
+              ),
+              const SizedBox(height: 16),
+              // TextField for SSID
+              TextField(
+                decoration: const InputDecoration(labelText: 'Enter SSID'),
+                onChanged: (value) {
+                  setState(() {
+                    _ssid = value;
+                  });
                 },
-              );
-            }).toList(),
+              ),
+              // TextField for Password
+              TextField(
+                decoration: const InputDecoration(labelText: 'Enter Password'),
+                onChanged: (value) {
+                  setState(() {
+                    _password = value;
+                  });
+                },
+                obscureText: true,
+              ),
+            ],
           ),
           actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.pop(context);
+                if (_ssid.isNotEmpty && _password.isNotEmpty) {
+                  _sendWiFiCredentials(_ssid, _password);
+                } else {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                        content: Text('Please enter valid credentials')),
+                  );
+                }
+              },
+              child: const Text('Connect'),
+            ),
             TextButton(
                 onPressed: () => Navigator.pop(context), child: Text('Cancel'))
           ],
@@ -247,18 +170,29 @@ class _DevicesPageState extends State<DevicesPage> {
     );
   }
 
-  Future<bool> _requestPermissions() async {
-    // Request location permissions for iOS and Android
-    final locationWhenInUse = await Permission.locationWhenInUse.request();
-    final locationAlways = await Permission.locationAlways.request();
+  String _ssid = '';
+  String _password = '';
 
-    // Check final permissions
-    return locationWhenInUse.isGranted && locationAlways.isGranted;
-  }
+  // Send the Wi-Fi credentials to the IoT device
+  Future<void> _sendWiFiCredentials(String ssid, String password) async {
+    final url = Uri.parse('http://192.168.4.1/prov'); // Assuming the SoftAP IP
+    try {
+      final response =
+          await http.post(url, body: {'ssid': ssid, 'password': password});
 
-  Future<void> _startSoftAPProvisioning(String ssid) async {
-    final url = Uri.parse('http://192.168.4.1/prov');
-    await http
-        .post(url, body: {'ssid': 'MyHomeSSID', 'password': 'MyHomePassword'});
+      if (response.statusCode == 200) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Wi-Fi credentials sent successfully!')),
+        );
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Failed to send Wi-Fi credentials.')),
+        );
+      }
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Error: $e')),
+      );
+    }
   }
 }
