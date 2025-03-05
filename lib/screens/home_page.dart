@@ -113,7 +113,7 @@ class _HomePageState extends State<HomePage> {
               if (_selectedIndex == 0)
                 Container(
                   padding:
-                      const EdgeInsets.symmetric(vertical: 21, horizontal: 20),
+                      const EdgeInsets.symmetric(vertical: 5, horizontal: 20),
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [

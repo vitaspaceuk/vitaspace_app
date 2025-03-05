@@ -35,7 +35,7 @@ class _NotificationPageState extends State<NotificationPage> {
           children: [
             // Header Section
             Container(
-              padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 20),
+              padding: const EdgeInsets.symmetric(vertical: 0, horizontal: 20),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
@@ -69,7 +69,7 @@ class _NotificationPageState extends State<NotificationPage> {
             // Clear All Button
             if (notifications.isNotEmpty)
               Padding(
-                padding: const EdgeInsets.only(left: 12),
+                padding: const EdgeInsets.only(left: 9),
                 child: TextButton(
                   onPressed: _clearAllNotifications,
                   child: const Text(

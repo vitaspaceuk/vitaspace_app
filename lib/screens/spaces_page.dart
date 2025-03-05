@@ -23,7 +23,7 @@ class SpacesPage extends StatelessWidget {
           children: [
             // Header
             Container(
-              padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 20),
+              padding: const EdgeInsets.symmetric(vertical: 0, horizontal: 20),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
@@ -147,14 +147,11 @@ class SpacesPage extends StatelessWidget {
             onPressed: () => Navigator.pop(context),
             child: const Text('Cancel'),
           ),
-          ElevatedButton(
+          TextButton(
             onPressed: () async {
               await spacesProvider.addSpace(controller.text);
               Navigator.pop(context);
             },
-            style: ElevatedButton.styleFrom(
-              backgroundColor: const Color(0xFF40E0D0), // Turquoise
-            ),
             child: const Text('Add'),
           ),
         ],
@@ -237,11 +234,8 @@ class SpacesPage extends StatelessWidget {
                   child: const Text('Cancel'),
                   onPressed: () => Navigator.of(context).pop(false),
                 ),
-                ElevatedButton(
+                TextButton(
                   child: const Text('Delete'),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.red,
-                  ),
                   onPressed: () => Navigator.of(context).pop(true),
                 ),
               ],

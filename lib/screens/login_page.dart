@@ -65,16 +65,15 @@ class _LoginPageState extends State<LoginPage> {
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   // App Icon
-                  Container(
-                    padding: const EdgeInsets.all(20.0),
-                    decoration: const BoxDecoration(
-                      color: Color(0xFF4EAACC),
-                      shape: BoxShape.circle,
+                  ClipOval(
+                    child: Image.asset(
+                      'assets/icon/vitaspace_logo.png',
+                      width: 140,
+                      height: 140,
+                      fit: BoxFit.cover,
                     ),
-                    child:
-                        const Icon(Icons.person, size: 80, color: Colors.white),
                   ),
-                  const SizedBox(height: 20),
+                  const SizedBox(height: 0),
 
                   // App Name
                   const Text(

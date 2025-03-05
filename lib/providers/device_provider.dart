@@ -8,12 +8,12 @@ class DeviceProvider with ChangeNotifier {
   bool _isLoading = false;
 
   List<Map<String, dynamic>> get devices => _devices;
-  bool get isLoading => _isLoading; // ✅ Added isLoading getter
+  bool get isLoading => _isLoading;
 
   /// Fetch devices for the given user and space.
   Future<void> fetchDevices(String userId, String spaceId) async {
     _isLoading = true;
-    notifyListeners(); // Notify UI to show loading state
+    notifyListeners();
 
     try {
       final snapshot = await _firestore
@@ -28,10 +28,11 @@ class DeviceProvider with ChangeNotifier {
           snapshot.docs.map((doc) => {'id': doc.id, ...doc.data()}).toList();
     } catch (e) {
       print('❌ Error fetching devices: $e');
+      _devices = []; // Reset devices list on error
     }
 
     _isLoading = false;
-    notifyListeners(); // Notify UI that loading is complete
+    notifyListeners();
   }
 
   /// Add a new device to Firestore.
@@ -58,16 +59,10 @@ class DeviceProvider with ChangeNotifier {
     }
   }
 
-  /// Remove a device and reset its WiFi credentials.
+  /// Remove a device from Firestore.
   Future<void> removeDevice(
       String userId, String spaceId, String deviceId) async {
     try {
-      final device = _devices.firstWhere((device) => device['id'] == deviceId,
-          orElse: () => {});
-      if (device.isNotEmpty && device.containsKey('ipAddress')) {
-        await resetDeviceCredentials(device['ipAddress']);
-      }
-
       await _firestore
           .collection('users')
           .doc(userId)
@@ -106,27 +101,5 @@ class DeviceProvider with ChangeNotifier {
     } catch (e) {
       print('❌ Error renaming device: $e');
     }
-  }
-
-  /// Reset WiFi credentials for the device (calls ESP32 endpoint).
-  Future<void> resetDeviceCredentials(String deviceIp) async {
-    try {
-      final url = Uri.parse('http://$deviceIp/reset');
-      final response = await http.get(url);
-
-      if (response.statusCode == 200) {
-        print('✅ Device credentials reset successfully.');
-      } else {
-        print('❌ Failed to reset device credentials: ${response.body}');
-      }
-    } catch (e) {
-      print('❌ Error resetting device credentials: $e');
-    }
-  }
-
-  /// Clear all devices from local state.
-  void clearDevices() {
-    _devices = [];
-    notifyListeners();
   }
 }

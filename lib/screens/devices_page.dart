@@ -15,13 +15,20 @@ class DevicesPage extends StatefulWidget {
 
 class _DevicesPageState extends State<DevicesPage> {
   @override
+  void initState() {
+    super.initState();
+    final userId = FirebaseAuth.instance.currentUser?.uid;
+    if (userId != null) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        Provider.of<DeviceProvider>(context, listen: false)
+            .fetchDevices(userId, widget.spaceId);
+      });
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
     final deviceProvider = Provider.of<DeviceProvider>(context, listen: true);
-    final userId = FirebaseAuth.instance.currentUser?.uid;
-
-    if (userId != null) {
-      deviceProvider.fetchDevices(userId, widget.spaceId);
-    }
 
     return Scaffold(
       backgroundColor: Colors.white,
@@ -69,10 +76,13 @@ class _DevicesPageState extends State<DevicesPage> {
             Expanded(
               child: Consumer<DeviceProvider>(
                 builder: (context, provider, child) {
+                  if (provider.isLoading) {
+                    return const Center(child: CircularProgressIndicator());
+                  }
                   if (provider.devices.isEmpty) {
                     return const Center(
                       child: Text(
-                        'No devices available.',
+                        'No devices available',
                         style: TextStyle(color: Colors.black54),
                       ),
                     );
@@ -93,6 +103,14 @@ class _DevicesPageState extends State<DevicesPage> {
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(10),
                           ),
+                          trailing: IconButton(
+                            icon: const Icon(Icons.more_vert,
+                                color: Colors.grey, size: 28),
+                            onPressed: () {
+                              _showDeviceOptionsDialog(
+                                  context, deviceProvider, device);
+                            },
+                          ),
                         ),
                       );
                     },
@@ -106,81 +124,88 @@ class _DevicesPageState extends State<DevicesPage> {
     );
   }
 
-  // Show Wi-Fi credentials dialog with instructions
+  // Show Wi-Fi credentials dialog
   void _showWiFiConnectionDialog() {
+    String ssid = '';
+    String password = '';
+
     showDialog(
       context: context,
       builder: (BuildContext context) {
-        return AlertDialog(
-          title: const Text('Connect to Device'),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              // Instructions Text
-              const Text(
-                'Step 1: Open your phone’s Wi-Fi settings.\n\n'
-                'Step 2: Connect to the Wi-Fi network named:\n'
-                '"VitaSpace_<Device_ID>"\n\n'
-                'Step 3: Reopen the VitaSpace app and enter the SSID and password of your home Wi-Fi network.\n\n'
-                'Step 4: Press "Connect" to send the credentials.',
-                style: TextStyle(fontSize: 14, color: Colors.black54),
+        return StatefulBuilder(
+          builder: (context, setDialogState) {
+            return AlertDialog(
+              title: const Text('Connect to Device'),
+              content: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  const Text(
+                    'Step 1: Connect to the Wi-Fi network named:\n'
+                    '"VitaSpace_<Device_ID>"\n\n'
+                    'Step 2: Enter your home Wi-Fi SSID and password.',
+                    style: TextStyle(fontSize: 14, color: Colors.black54),
+                  ),
+                  const SizedBox(height: 16),
+                  TextField(
+                    decoration: const InputDecoration(labelText: 'Enter SSID'),
+                    onChanged: (value) {
+                      setDialogState(() {
+                        ssid = value;
+                      });
+                    },
+                  ),
+                  TextField(
+                    decoration:
+                        const InputDecoration(labelText: 'Enter Password'),
+                    obscureText: true,
+                    onChanged: (value) {
+                      setDialogState(() {
+                        password = value;
+                      });
+                    },
+                  ),
+                ],
               ),
-              const SizedBox(height: 16),
-              // TextField for SSID
-              TextField(
-                decoration: const InputDecoration(labelText: 'Enter SSID'),
-                onChanged: (value) {
-                  setState(() {
-                    _ssid = value;
-                  });
-                },
-              ),
-              // TextField for Password
-              TextField(
-                decoration: const InputDecoration(labelText: 'Enter Password'),
-                onChanged: (value) {
-                  setState(() {
-                    _password = value;
-                  });
-                },
-                obscureText: true,
-              ),
-            ],
-          ),
-          actions: [
-            TextButton(
-              onPressed: () {
-                Navigator.pop(context);
-                if (_ssid.isNotEmpty && _password.isNotEmpty) {
-                  _sendWiFiCredentials(_ssid, _password);
-                } else {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                        content: Text('Please enter valid credentials')),
-                  );
-                }
-              },
-              child: const Text('Connect'),
-            ),
-            TextButton(
-                onPressed: () => Navigator.pop(context), child: Text('Cancel'))
-          ],
+              actions: [
+                TextButton(
+                  onPressed: () {
+                    if (ssid.isNotEmpty && password.isNotEmpty) {
+                      _sendWiFiCredentials(ssid, password);
+                      Navigator.pop(context);
+                    } else {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                            content: Text('Please enter valid credentials')),
+                      );
+                    }
+                  },
+                  child: const Text('Connect'),
+                ),
+                TextButton(
+                    onPressed: () => Navigator.pop(context),
+                    child: const Text('Cancel')),
+              ],
+            );
+          },
         );
       },
     );
   }
 
-  String _ssid = '';
-  String _password = '';
-
-  // Send the Wi-Fi credentials to the IoT device
+  // Send Wi-Fi credentials and add device
   Future<void> _sendWiFiCredentials(String ssid, String password) async {
-    final url = Uri.parse('http://192.168.4.1/prov'); // Assuming the SoftAP IP
+    final url = Uri.parse('http://192.168.4.1/prov');
     try {
       final response =
           await http.post(url, body: {'ssid': ssid, 'password': password});
 
       if (response.statusCode == 200) {
+        final userId = FirebaseAuth.instance.currentUser?.uid;
+        if (userId != null) {
+          Provider.of<DeviceProvider>(context, listen: false)
+              .addDevice(userId, widget.spaceId, 'AdaptAir+', '192.168.4.1');
+        }
+
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('Wi-Fi credentials sent successfully!')),
         );
@@ -194,5 +219,71 @@ class _DevicesPageState extends State<DevicesPage> {
         SnackBar(content: Text('Error: $e')),
       );
     }
+  }
+
+  // Show device options (rename or remove)
+  void _showDeviceOptionsDialog(BuildContext context,
+      DeviceProvider deviceProvider, Map<String, dynamic> device) {
+    showDialog(
+      context: context,
+      builder: (_) => AlertDialog(
+        title: Text('Options for "${device['name']}"'),
+        content: const Text('What would you like to do?'),
+        actions: [
+          TextButton(
+            onPressed: () {
+              Navigator.pop(context);
+              _showRenameDeviceDialog(context, deviceProvider, device);
+            },
+            child: const Text('Rename'),
+          ),
+          TextButton(
+            onPressed: () async {
+              final userId = FirebaseAuth.instance.currentUser?.uid;
+              if (userId != null) {
+                await deviceProvider.removeDevice(
+                    userId, widget.spaceId, device['id']);
+              }
+              Navigator.pop(context);
+            },
+            child: const Text('Delete'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  // Show rename device dialog
+  void _showRenameDeviceDialog(BuildContext context,
+      DeviceProvider deviceProvider, Map<String, dynamic> device) {
+    final TextEditingController controller =
+        TextEditingController(text: device['name']);
+    showDialog(
+      context: context,
+      builder: (_) => AlertDialog(
+        title: const Text('Rename Device'),
+        content: TextField(
+          controller: controller,
+          decoration: const InputDecoration(hintText: 'Enter new name'),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Cancel'),
+          ),
+          ElevatedButton(
+            onPressed: () async {
+              final userId = FirebaseAuth.instance.currentUser?.uid;
+              if (userId != null) {
+                await deviceProvider.renameDevice(
+                    userId, widget.spaceId, device['id'], controller.text);
+              }
+              Navigator.pop(context);
+            },
+            child: const Text('Rename'),
+          ),
+        ],
+      ),
+    );
   }
 }
